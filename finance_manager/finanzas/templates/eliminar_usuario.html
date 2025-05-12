@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Usuario - {{ usuario.nombre }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fc;
+            color: #333;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 30px auto;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: #e74c3c;
+            color: white;
+            font-weight: bold;
+            padding: 15px 20px;
+            font-size: 18px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .warning-message {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .warning-message i {
+            margin-right: 10px;
+        }
+
+        .user-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        form {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-exclamation-triangle"></i> Eliminar Usuario
+            </div>
+            <div class="card-body">
+                <div class="warning-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>¡Advertencia!</strong> Esta acción eliminará permanentemente el usuario y todos sus datos asociados.
+                </div>
+
+                <div class="user-info">
+                    <p><strong>Nombre:</strong> {{ usuario.nombre }}</p>
+                    <p><strong>Email:</strong> {{ usuario.email }}</p>
+                    <p><strong>Sueldo Base:</strong> ${{ usuario.sueldo_base }}</p>
+                    <p><strong>Meta de Ahorro:</strong> ${{ usuario.meta_ahorro }}</p>
+                    <p><strong>Ahorro Actual:</strong> ${{ usuario.ahorro_actual }}</p>
+                </div>
+
+                <div class="button-group">
+                    <a href="{% url 'dashboard' usuario.id %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <form method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás completamente seguro de que deseas eliminar este usuario y todos sus datos? Esta acción no se puede deshacer.')">
+                            <i class="fas fa-trash"></i> Eliminar Usuario
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

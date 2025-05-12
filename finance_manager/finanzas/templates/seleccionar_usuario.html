@@ -79,6 +79,45 @@
             margin-top: 50px;
         }
 
+        .user-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn-eliminar {
+            background-color: #e74c3c;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-eliminar:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-crear {
+            display: block;
+            background-color: #27AE60;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-crear:hover {
+            background-color: #2ECC71;
+        }
     </style>
 </head>
 <body>
@@ -95,9 +134,17 @@
                         <span class="user-icon"><i class="fas fa-user"></i></span>
                         {{ u.nombre }} ({{ u.email }})
                     </a>
+                    <div class="user-actions">
+                        <a href="{% url 'eliminar_usuario' u.id %}" class="btn-eliminar" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario? Esta acción eliminará todos sus datos asociados.')">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </a>
+                    </div>
                 </li>
             {% endfor %}
         </ul>
+        <a href="{% url 'crear_usuario' %}" class="btn-crear">
+            <i class="fas fa-user-plus"></i> Crear Nuevo Usuario
+        </a>
     </div>
 
     <div class="footer">

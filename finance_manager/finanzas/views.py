@@ -406,3 +406,23 @@ def actualizar_ahorro(request, usuario_id):
         return redirect('dashboard', usuario_id=usuario.id)
 
     return render(request, 'actualizar_ahorro.html', {'usuario': usuario})
+
+
+def eliminar_usuario(request, usuario_id):
+    try:
+        usuario = Usuario.objects.get(id=usuario_id)
+        
+        if request.method == 'POST':
+            # Eliminar todos los gastos asociados
+            Gasto.objects.filter(usuario=usuario).delete()
+            # Eliminar todos los ingresos asociados
+            Ingreso.objects.filter(usuario=usuario).delete()
+            # Eliminar todas las categorías asociadas
+            Categoria.objects.filter(usuario=usuario).delete()
+            # Finalmente eliminar el usuario
+            usuario.delete()
+            return redirect('seleccionar_usuario')
+            
+        return render(request, 'eliminar_usuario.html', {'usuario': usuario})
+    except DoesNotExist:
+        return redirect('seleccionar_usuario')
