@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - {{ usuario.nombre }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fc;
+            color: #333;
+        }
+
+        nav {
+            background-color: #2C3E50;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: #1abc9c;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 30px auto;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .half-card {
+            flex: 1;
+            min-width: 300px;
+            min-height: 260px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            padding: 15px 20px;
+            font-size: 18px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .card-body {
+            padding: 20px;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .highlight-card {
+            font-size: 18px;
+        }
+
+        .btn {
+            background-color: #27AE60;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: #2ECC71;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            background-color: #ecf0f1;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #95a5a6;
+            margin: 40px 0 20px;
+        }
+
+        .footer a {
+            color: #27AE60;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .filter-form {
+            margin-bottom: 30px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .filter-form label {
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .filter-form input,
+        .filter-form select {
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            width: 180px;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-form input:focus,
+        .filter-form select:focus {
+            border-color: #27AE60;
+            outline: none;
+        }
+
+        .filter-form button {
+            background-color: #27AE60;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .filter-form button:hover {
+            background-color: #2ECC71;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .actions a {
+            text-decoration: none;
+        }
+
+        .btn-actualizar {
+            display: inline-block;
+            background-color: #27AE60;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-actualizar:hover {
+            background-color: #2ECC71;
+        }
+
+        .gasto-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-editar, .btn-eliminar {
+            padding: 8px;
+            border-radius: 4px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-editar {
+            background-color: #3498db;
+        }
+
+        .btn-editar:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-eliminar {
+            background-color: #e74c3c;
+        }
+
+        .btn-eliminar:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-editar-categoria {
+            color: #3498db;
+            text-decoration: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-editar-categoria:hover {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .resumen-categorias-lista {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 0;
+            padding: 0;
+        }
+        .resumen-categorias-lista li {
+            margin-bottom: 10px;
+        }
+
+        .dashboard-stats {
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .stat-card h3 {
+            color: #2C3E50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .alert-container {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+        }
+
+        .alert-container.warning {
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+            color: #856404;
+        }
+
+        .alert-container.danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 7px;
+            transition: width 0.4s ease;
+        }
+
+        .progress-bar.safe {
+            background-color: #28a745;
+        }
+
+        .progress-bar.warning {
+            background-color: #ffc107;
+        }
+
+        .progress-bar.danger {
+            background-color: #dc3545;
+        }
+
+    </style>
+</head>
+<body>
+
+<h1 style="text-align:center; color:#2C3E50; margin-top:30px; font-size:2.5rem; letter-spacing:2px;">Gestor De Finanzas</h1>
+
+<nav>
+    <a href="{% url 'agregar_gasto' usuario.id %}">
+        <i class="fas fa-plus-circle"></i> Agregar Gasto
+    </a>
+    <a href="{% url 'agregar_ingreso' usuario.id %}">
+        <i class="fas fa-plus-circle"></i> Agregar Ingreso
+    </a>
+    <a href="{% url 'seleccionar_usuario' %}">
+        <i class="fas fa-user-circle"></i> Cambiar Usuario
+    </a>
+    <a href="{% url 'crear_usuario' %}">
+        <i class="fas fa-user-plus"></i> Crear Usuario
+    </a>
+    <a href="{% url 'lista_categorias' usuario.id %}">
+        <i class="fas fa-folder-plus"></i> Agregar Categoría
+    </a>
+</nav>
+
+<div class="container">
+    <form method="get" class="filter-form">
+        <div>
+            <label for="fecha">Filtrar por Fecha:</label>
+            <input type="date" name="fecha" value="{{ fecha_filtro }}">
+        </div>
+
+        <div>
+            <label for="orden">Ordenar por Monto:</label>
+            <select name="orden">
+                <option value="">-- Seleccionar --</option>
+                <option value="mayor" {% if orden_filtro == 'mayor' %}selected{% endif %}>Mayor a menor</option>
+                <option value="menor" {% if orden_filtro == 'menor' %}selected{% endif %}>Menor a mayor</option>
+            </select>
+        </div>
+
+        <button type="submit">Aplicar Filtros</button>
+    </form>
+
+    <div class="row">
+        <div class="half-card">
+            <div class="card">
+                <div class="card-header">Resumen Financiero</div>
+                <div class="card-body">
+                    <p>Sueldo Base: ${{ usuario.sueldo_base }}</p>
+                    <p>Total de Ingresos: ${{ total_ingresos }}</p>
+                    <p>Total de Gastos: ${{ total_gastos }}</p>
+                    <p>Saldo Restante: ${{ saldo_restante }}</p>
+                    <a href="{% url 'editar_resumen' usuario.id %}" class="btn-actualizar">
+                        <i class="fas fa-sync-alt"></i> Actualizar Monto
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="half-card">
+            <div class="card">
+                <div class="card-header">Ahorro</div>
+                <div class="card-body">
+                    <p>Meta de Ahorro: ${{ usuario.meta_ahorro }}</p>
+                    <p>Ahorro Actual: ${{ usuario.ahorro_actual }}</p>
+                    <p>Porcentaje de Ahorro: {{ porcentaje_ahorro }}%</p>
+                    <a href="{% url 'actualizar_ahorro' usuario.id %}" class="btn-actualizar">
+                        <i class="fas fa-plus-circle"></i> Agregar Ahorro
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="half-card">
+            <div class="card">
+                <div class="card-header">Últimos Gastos</div>
+                <div class="card-body">
+                    <ul>
+                        {% for gasto in gastos %}
+                            <li style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>{{ gasto.fecha }} {{ gasto.hora|time:"H:i" }} - ${{ gasto.monto }} - {{ gasto.categoria.nombre }}</span>
+                                <div class="gasto-actions">
+                                    <a href="{% url 'editar_gasto' gasto.id %}" class="btn-editar" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'eliminar_gasto' gasto.id %}" class="btn-eliminar" title="Eliminar" onclick="return confirm('¿Estás seguro de que deseas eliminar este gasto?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="half-card">
+            <div class="card">
+                <div class="card-header">Últimos Ingresos</div>
+                <div class="card-body">
+                    <ul>
+                        {% for ingreso in ingresos %}
+                            <li style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>{{ ingreso.fecha }} {{ ingreso.hora|time:"H:i" }} - ${{ ingreso.monto }} - {{ ingreso.descripcion }}</span>
+                                <div class="gasto-actions">
+                                    <a href="{% url 'editar_ingreso' ingreso.id %}" class="btn-editar" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'eliminar_ingreso' ingreso.id %}" class="btn-eliminar" title="Eliminar" onclick="return confirm('¿Estás seguro de que deseas eliminar este ingreso?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema de Alertas -->
+    {% if resumen_categorias %}
+        {% for cat in resumen_categorias %}
+            {% if cat.limite > 0 %}
+                {% if cat.porcentaje >= 90 %}
+                    <div class="alert-container danger">
+                        <i class="fas fa-exclamation-triangle alert-icon"></i>
+                        ¡Alerta! Has superado el 90% del límite en la categoría "{{ cat.nombre }}". 
+                        Llevas gastado ${{ cat.gasto }} de ${{ cat.limite }}.
+                    </div>
+                {% elif cat.porcentaje >= 75 %}
+                    <div class="alert-container warning">
+                        <i class="fas fa-exclamation-circle alert-icon"></i>
+                        Atención: Te estás acercando al límite en la categoría "{{ cat.nombre }}". 
+                        Has gastado ${{ cat.gasto }} de ${{ cat.limite }} ({{ cat.porcentaje }}%).
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <!-- Resumen por Categoría -->
+    <div class="card" style="margin-top: 30px;">
+        <div class="card-header">📊 Resumen por Categoría</div>
+        <div class="card-body">
+            {% if resumen_categorias %}
+                <ul class="resumen-categorias-lista">
+                    {% for cat in resumen_categorias %}
+                        <li style="background-color: #fff; flex-direction: column; align-items: flex-start;">
+                            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <strong>{{ cat.nombre }}</strong>
+                                    <a href="{% url 'editar_categoria' cat.id %}?usuario_id={{ usuario.id }}" class="btn-editar-categoria" title="Editar Categoría">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                                <span>${{ cat.gasto }} / ${{ cat.limite }}</span>
+                            </div>
+                            <div style="width: 100%; background-color: #ecf0f1; height: 14px; border-radius: 7px; margin-top: 8px;">
+                                <div class="progress-bar" 
+                                     data-porcentaje="{{ cat.porcentaje }}"
+                                     style="width: {{ cat.porcentaje }}%;">
+                                </div>
+                            </div>
+                            <div style="text-align: right; width: 100%; font-size: 12px; margin-top: 4px; color: #666;">
+                                {{ cat.porcentaje }}% usado
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay datos de categorías para mostrar.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Gráfico de Tendencias -->
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <h3><i class="fas fa-chart-line"></i> Tendencia Mensual</h3>
+            <div class="chart-container">
+                <canvas id="tendenciasChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar barras de progreso
+    document.querySelectorAll('.progress-bar').forEach(function(bar) {
+        const porcentaje = parseInt(bar.dataset.porcentaje);
+        if (porcentaje >= 90) {
+            bar.classList.add('danger');
+        } else if (porcentaje >= 75) {
+            bar.classList.add('warning');
+        } else {
+            bar.classList.add('safe');
+        }
+    });
+
+    // Inicializar gráfico
+    const ctx = document.getElementById('tendenciasChart').getContext('2d');
+    
+    // Datos del gráfico
+    const meses = {{ meses|safe }};
+    const gastos = {{ gastos_mensuales|safe }};
+    const ingresos = {{ ingresos_mensuales|safe }};
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: meses,
+            datasets: [
+                {
+                    label: 'Gastos',
+                    data: gastos,
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Ingresos',
+                    data: ingresos,
+                    borderColor: '#27AE60',
+                    backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Tendencia de Gastos e Ingresos'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+
+</body>
+</html>

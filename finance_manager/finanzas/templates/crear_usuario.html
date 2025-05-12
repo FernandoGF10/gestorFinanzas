@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Usuario</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #2C3E50;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        form label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        form input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            color: #2C3E50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link i {
+            margin-right: 5px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><i class="fas fa-user-plus"></i> Crear nuevo usuario</h1>
+    </header>
+
+    <div class="container">
+        <form method="post">
+            {% csrf_token %}
+            <label>Nombre:</label>
+            <input type="text" name="nombre" required>
+
+            <label>Email:</label>
+            <input type="email" name="email" required>
+
+            <label>Sueldo base:</label>
+            <input type="number" name="sueldo_base" step="0.01" required>
+
+            <label>Meta de ahorro:</label>
+            <input type="number" name="meta_ahorro" step="0.01" required>
+
+            <button type="submit"><i class="fas fa-check"></i> Crear usuario</button>
+        </form>
+
+        <a class="back-link" href="{% url 'seleccionar_usuario' %}"><i class="fas fa-arrow-left"></i> Volver</a>
+    </div>
+
+</body>
+</html>
