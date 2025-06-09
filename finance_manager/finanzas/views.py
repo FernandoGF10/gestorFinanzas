@@ -15,7 +15,7 @@ def crear_usuario(request):
         nombre = request.POST['nombre']
         email = request.POST['email']
         sueldo_base = float(request.POST['sueldo_base'])
-        meta_ahorro = float(request.POST['meta_ahorro'])
+        meta_ahorro = float(request.POST.get('meta_ahorro', 0))
 
         usuario = Usuario(
             nombre=nombre,
@@ -25,6 +25,23 @@ def crear_usuario(request):
             ahorro_actual=0.0
         )
         usuario.save()
+
+        # Procesar gastos esenciales iniciales
+        descripciones = request.POST.getlist('gastos_esenciales_descripcion[]')
+        montos = request.POST.getlist('gastos_esenciales_monto[]')
+        fechas = request.POST.getlist('gastos_esenciales_fecha[]')
+
+        for i in range(len(descripciones)):
+            if descripciones[i] and montos[i] and fechas[i]:  # Solo crear si todos los campos están llenos
+                gasto_esencial = GastoEsencial(
+                    usuario=usuario,
+                    descripcion=descripciones[i],
+                    monto=float(montos[i]),
+                    fecha_limite=datetime.strptime(fechas[i], '%Y-%m-%d').date(),
+                    pagado=False
+                )
+                gasto_esencial.save()
+
         return redirect('seleccionar_usuario')
     # Mostrar el formulario en caso GET
     return render(request, 'crear_usuario.html')
@@ -177,6 +194,25 @@ def agregar_gasto(request, usuario_id):
         categoria_id = request.POST.get('categoria')
         categoria = Categoria.objects.get(id=categoria_id) if categoria_id else None
 
+        # Calcular saldo disponible
+        total_gastos = sum(g.monto for g in Gasto.objects(usuario=usuario))
+        gastos_esenciales_pagados = sum(g.monto for g in GastoEsencial.objects(usuario=usuario, pagado=True))
+        gastos_esenciales_pendientes = sum(g.monto for g in GastoEsencial.objects(usuario=usuario, pagado=False))
+        saldo_total = usuario.sueldo_base + sum(i.monto for i in Ingreso.objects(usuario=usuario)) - total_gastos - gastos_esenciales_pagados
+        saldo_disponible = saldo_total - gastos_esenciales_pendientes
+
+        # Validar si hay suficiente saldo considerando gastos esenciales pendientes
+        if monto > saldo_disponible:
+            categorias = Categoria.objects.filter(usuario=usuario)
+            mensaje_error = f"⚠️ Saldo insuficiente: Solo tienes ${saldo_disponible} disponibles para gastos no esenciales. "
+            if gastos_esenciales_pendientes > 0:
+                mensaje_error += f"Tienes ${gastos_esenciales_pendientes} en gastos esenciales pendientes que deben ser pagados primero."
+            return render(request, 'agregar_gasto.html', {
+                'usuario': usuario,
+                'categorias': categorias,
+                'error': mensaje_error
+            })
+
         # VALIDACIÓN del límite por categoría
         if categoria and categoria.limite_gasto:
             total_gastado = sum(g.monto for g in Gasto.objects(usuario=usuario, categoria=categoria))
@@ -188,7 +224,7 @@ def agregar_gasto(request, usuario_id):
                     'error': f"⚠️ Límite superado: ya llevas ${total_gastado} de ${categoria.limite_gasto} en '{categoria.nombre}'"
                 })
 
-        # Guardar si está dentro del límite
+        # Guardar si está dentro del límite y hay saldo suficiente
         nuevo_gasto = Gasto(
             usuario=usuario,
             descripcion=descripcion,
@@ -200,7 +236,7 @@ def agregar_gasto(request, usuario_id):
 
         return redirect(f'/usuario/{usuario.id}/')
 
-    categorias = Categoria.objects.filter(usuario=usuario)  # Solo mostrar categorías del usuario actual
+    categorias = Categoria.objects.filter(usuario=usuario)
     return render(request, 'agregar_gasto.html', {'usuario': usuario, 'categorias': categorias})
 
 
@@ -451,6 +487,25 @@ def agregar_gasto_esencial(request, usuario_id):
         fecha_limite = datetime.strptime(request.POST.get('fecha_limite'), '%Y-%m-%d').date()
         categoria_id = request.POST.get('categoria')
         categoria = Categoria.objects.get(id=categoria_id) if categoria_id else None
+
+        # Calcular saldo disponible
+        total_gastos = sum(g.monto for g in Gasto.objects(usuario=usuario))
+        gastos_esenciales_pagados = sum(g.monto for g in GastoEsencial.objects(usuario=usuario, pagado=True))
+        gastos_esenciales_pendientes = sum(g.monto for g in GastoEsencial.objects(usuario=usuario, pagado=False))
+        saldo_total = usuario.sueldo_base + sum(i.monto for i in Ingreso.objects(usuario=usuario)) - total_gastos - gastos_esenciales_pagados
+        saldo_disponible = saldo_total - gastos_esenciales_pendientes
+
+        # Validar si hay suficiente saldo considerando gastos esenciales pendientes
+        if monto > saldo_disponible:
+            categorias = Categoria.objects.filter(usuario=usuario)
+            mensaje_error = f"⚠️ Saldo insuficiente: Solo tienes ${saldo_disponible} disponibles para nuevos gastos esenciales. "
+            if gastos_esenciales_pendientes > 0:
+                mensaje_error += f"Tienes ${gastos_esenciales_pendientes} en gastos esenciales pendientes que deben ser pagados primero."
+            return render(request, 'agregar_gasto_esencial.html', {
+                'usuario': usuario,
+                'categorias': categorias,
+                'error': mensaje_error
+            })
 
         nuevo_gasto = GastoEsencial(
             usuario=usuario,

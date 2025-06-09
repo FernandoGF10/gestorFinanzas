@@ -1,111 +1,136 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Crear Usuario</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f7fc;
-            margin: 0;
-            padding: 0;
-        }
+{% extends 'base.html' %}
 
-        header {
-            background-color: #2C3E50;
-            color: #ffffff;
-            padding: 20px;
-            text-align: center;
-        }
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-user-plus"></i> Crear Nuevo Usuario
+        </div>
+        <div class="card-body">
+            <form method="POST" id="usuarioForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="sueldo_base">Sueldo Base</label>
+                    <input type="number" class="form-control" id="sueldo_base" name="sueldo_base" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="meta_ahorro">Meta de Ahorro</label>
+                    <input type="number" class="form-control" id="meta_ahorro" name="meta_ahorro" step="0.01" value="0">
+                </div>
 
-        header h1 {
-            font-size: 2rem;
-            margin: 0;
-        }
+                <h3 class="mt-4">Gastos Esenciales Iniciales</h3>
+                <div id="gastosEsenciales">
+                    <div class="gasto-esencial-item">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Descripción</label>
+                                    <input type="text" class="form-control" name="gastos_esenciales_descripcion[]" placeholder="Ej: Arriendo">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Monto</label>
+                                    <input type="number" class="form-control" name="gastos_esenciales_monto[]" step="0.01" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Fecha Límite</label>
+                                    <input type="date" class="form-control" name="gastos_esenciales_fecha[]">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="button" class="btn btn-danger btn-block" onclick="eliminarGasto(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        .container {
-            max-width: 500px;
-            margin: 40px auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
+                <button type="button" class="btn btn-secondary mt-2" onclick="agregarGastoEsencial()">
+                    <i class="fas fa-plus"></i> Agregar Gasto Esencial
+                </button>
 
-        form label {
-            display: block;
-            margin-top: 15px;
-            font-weight: bold;
-        }
-
-        form input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            margin-top: 5px;
-        }
-
-        button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #2980b9;
-        }
-
-        .back-link {
-            display: block;
-            margin-top: 20px;
-            text-align: center;
-            color: #2C3E50;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .back-link i {
-            margin-right: 5px;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-
-    <header>
-        <h1><i class="fas fa-user-plus"></i> Crear nuevo usuario</h1>
-    </header>
-
-    <div class="container">
-        <form method="post">
-            {% csrf_token %}
-            <label>Nombre:</label>
-            <input type="text" name="nombre" required>
-
-            <label>Email:</label>
-            <input type="email" name="email" required>
-
-            <label>Sueldo base:</label>
-            <input type="number" name="sueldo_base" step="0.01" required>
-
-            <label>Meta de ahorro:</label>
-            <input type="number" name="meta_ahorro" step="0.01" required>
-
-            <button type="submit"><i class="fas fa-check"></i> Crear usuario</button>
-        </form>
-
-        <a class="back-link" href="{% url 'seleccionar_usuario' %}"><i class="fas fa-arrow-left"></i> Volver</a>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Crear Usuario</button>
+                    <a href="{% url 'seleccionar_usuario' %}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
 
-</body>
-</html>
+<script>
+function agregarGastoEsencial() {
+    const gastosContainer = document.getElementById('gastosEsenciales');
+    const nuevoGasto = document.createElement('div');
+    nuevoGasto.className = 'gasto-esencial-item mt-3';
+    nuevoGasto.innerHTML = `
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <input type="text" class="form-control" name="gastos_esenciales_descripcion[]" placeholder="Ej: Arriendo">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Monto</label>
+                    <input type="number" class="form-control" name="gastos_esenciales_monto[]" step="0.01" placeholder="0.00">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Fecha Límite</label>
+                    <input type="date" class="form-control" name="gastos_esenciales_fecha[]">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button type="button" class="btn btn-danger btn-block" onclick="eliminarGasto(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    gastosContainer.appendChild(nuevoGasto);
+}
+
+function eliminarGasto(button) {
+    const gastoItem = button.closest('.gasto-esencial-item');
+    gastoItem.remove();
+}
+</script>
+
+<style>
+.gasto-esencial-item {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.gasto-esencial-item:hover {
+    background-color: #e9ecef;
+}
+
+.btn-block {
+    width: 100%;
+}
+</style>
+{% endblock %}
