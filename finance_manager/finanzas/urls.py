@@ -19,4 +19,9 @@ urlpatterns = [
     path('categorias/eliminar/<str:categoria_id>/', views.eliminar_categoria, name='eliminar_categoria'),
     path('categoria/eliminar/<str:categoria_id>/', views.eliminar_categoria, name='eliminar_categoria'),
     path('usuario/<str:usuario_id>/editar-resumen/', views.editar_resumen, name='editar_resumen'),
+    # Rutas para gastos esenciales
+    path('usuario/<str:usuario_id>/gasto-esencial/', views.agregar_gasto_esencial, name='agregar_gasto_esencial'),
+    path('gasto-esencial/<str:gasto_id>/editar/', views.editar_gasto_esencial, name='editar_gasto_esencial'),
+    path('gasto-esencial/<str:gasto_id>/marcar-pagado/', views.marcar_gasto_esencial_pagado, name='marcar_gasto_esencial_pagado'),
+    path('gasto-esencial/<str:gasto_id>/eliminar/', views.eliminar_gasto_esencial, name='eliminar_gasto_esencial'),
 ]

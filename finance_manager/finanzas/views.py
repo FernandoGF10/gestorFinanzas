@@ -1,9 +1,9 @@
 from django.http import Http404
 from .forms import CategoriaForm, GastoForm
 from mongoengine import DoesNotExist
-from .models import Gasto, Categoria, Usuario, Ingreso
+from .models import Gasto, Categoria, Usuario, Ingreso, GastoEsencial
 from django.shortcuts import get_object_or_404, render, redirect
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import calendar
 
 
@@ -73,6 +73,7 @@ def dashboard_usuario(request, usuario_id):
 
     gastos = Gasto.objects.filter(usuario=usuario)
     ingresos = Ingreso.objects.filter(usuario=usuario)
+    gastos_esenciales = GastoEsencial.objects.filter(usuario=usuario)
 
     fecha = request.GET.get('fecha')
     orden = request.GET.get('orden')
@@ -108,7 +109,12 @@ def dashboard_usuario(request, usuario_id):
 
     total_ingresos = next(total_ingresos, {}).get('total', 0)
 
-    saldo_restante = usuario.sueldo_base + total_ingresos - total_gastos
+    # Calcular total de gastos esenciales pagados y pendientes
+    gastos_esenciales_pagados = sum(g.monto for g in gastos_esenciales if g.pagado)
+    gastos_esenciales_pendientes = sum(g.monto for g in gastos_esenciales if not g.pagado)
+
+    # El saldo restante ahora considera solo los gastos esenciales pagados
+    saldo_restante = usuario.sueldo_base + total_ingresos - total_gastos - gastos_esenciales_pagados
     porcentaje_ahorro = usuario.porcentaje_ahorro()
 
     # Resumen por categoría
@@ -139,8 +145,11 @@ def dashboard_usuario(request, usuario_id):
         'usuario': usuario,
         'gastos': gastos,
         'ingresos': ingresos,
+        'gastos_esenciales': gastos_esenciales,
         'total_gastos': total_gastos,
         'total_ingresos': total_ingresos,
+        'gastos_esenciales_pagados': gastos_esenciales_pagados,
+        'gastos_esenciales_pendientes': gastos_esenciales_pendientes,
         'saldo_restante': saldo_restante,
         'porcentaje_ahorro': round(porcentaje_ahorro, 2),
         'fecha_filtro': fecha or '',
@@ -149,6 +158,7 @@ def dashboard_usuario(request, usuario_id):
         'meses': meses,
         'gastos_mensuales': gastos_mensuales,
         'ingresos_mensuales': ingresos_mensuales,
+        'now': date.today(),
     }
 
     return render(request, 'dashboard.html', context)
@@ -318,7 +328,7 @@ def eliminar_categoria(request, categoria_id):
         categoria.delete()
         if usuario_id:
             return redirect('dashboard', usuario_id=usuario_id)
-        return redirect('lista_categorias')  # Redirigir al listado de categorías después de eliminarla
+        return redirect('lista_categorias')
 
     # Si no es una solicitud POST, redirigimos a la lista directamente
     if usuario_id:
@@ -426,3 +436,78 @@ def eliminar_usuario(request, usuario_id):
         return render(request, 'eliminar_usuario.html', {'usuario': usuario})
     except DoesNotExist:
         return redirect('seleccionar_usuario')
+
+
+# Vista para agregar un gasto esencial
+def agregar_gasto_esencial(request, usuario_id):
+    try:
+        usuario = Usuario.objects.get(id=usuario_id)
+    except DoesNotExist:
+        return redirect('/')
+
+    if request.method == 'POST':
+        descripcion = request.POST.get('descripcion')
+        monto = float(request.POST.get('monto'))
+        fecha_limite = datetime.strptime(request.POST.get('fecha_limite'), '%Y-%m-%d').date()
+        categoria_id = request.POST.get('categoria')
+        categoria = Categoria.objects.get(id=categoria_id) if categoria_id else None
+
+        nuevo_gasto = GastoEsencial(
+            usuario=usuario,
+            descripcion=descripcion,
+            monto=monto,
+            categoria=categoria,
+            fecha_limite=fecha_limite,
+            pagado=False
+        )
+        nuevo_gasto.save()
+        return redirect(f'/usuario/{usuario.id}/')
+
+    categorias = Categoria.objects.filter(usuario=usuario)
+    return render(request, 'agregar_gasto_esencial.html', {'usuario': usuario, 'categorias': categorias})
+
+
+# Vista para editar un gasto esencial
+def editar_gasto_esencial(request, gasto_id):
+    try:
+        gasto = GastoEsencial.objects.get(id=gasto_id)
+        usuario = gasto.usuario
+    except DoesNotExist:
+        return redirect('/')
+
+    if request.method == 'POST':
+        gasto.descripcion = request.POST.get('descripcion')
+        gasto.monto = float(request.POST.get('monto'))
+        gasto.fecha_limite = datetime.strptime(request.POST.get('fecha_limite'), '%Y-%m-%d').date()
+        categoria_id = request.POST.get('categoria')
+        gasto.categoria = Categoria.objects.get(id=categoria_id) if categoria_id else None
+        gasto.save()
+
+        return redirect(f'/usuario/{usuario.id}/')
+
+    categorias = Categoria.objects.filter(usuario=usuario)
+    return render(request, 'editar_gasto_esencial.html', {'gasto': gasto, 'usuario': usuario, 'categorias': categorias})
+
+
+# Vista para marcar un gasto esencial como pagado
+def marcar_gasto_esencial_pagado(request, gasto_id):
+    try:
+        gasto = GastoEsencial.objects.get(id=gasto_id)
+        usuario_id = gasto.usuario.id
+        gasto.pagado = True
+        gasto.fecha_pago = date.today()
+        gasto.save()
+        return redirect(f'/usuario/{usuario_id}/')
+    except DoesNotExist:
+        return redirect('/')
+
+
+# Vista para eliminar un gasto esencial
+def eliminar_gasto_esencial(request, gasto_id):
+    try:
+        gasto = GastoEsencial.objects.get(id=gasto_id)
+        usuario_id = gasto.usuario.id
+        gasto.delete()
+        return redirect(f'/usuario/{usuario_id}/')
+    except DoesNotExist:
+        return redirect('/')

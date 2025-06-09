@@ -1,5 +1,5 @@
 from django.db import models
-from mongoengine import Document, StringField, FloatField, DateField, ReferenceField, CASCADE, DateTimeField
+from mongoengine import Document, StringField, FloatField, DateField, ReferenceField, DateTimeField, BooleanField
 from datetime import date, datetime
 
 
@@ -55,3 +55,19 @@ class Ingreso(Document):
     monto = FloatField(required=True)
     fecha = DateField(default=date.today)
     hora = DateTimeField(default=datetime.now)
+
+
+# Modelo para GastoEsencial
+class GastoEsencial(Document):
+    usuario = ReferenceField(Usuario, required=True)
+    descripcion = StringField(required=True)
+    monto = FloatField(required=True)
+    categoria = ReferenceField(Categoria)
+    fecha_limite = DateField(required=True)
+    fecha_creacion = DateField(default=date.today)
+    hora_creacion = DateTimeField(default=datetime.now)
+    pagado = BooleanField(default=False)
+    fecha_pago = DateField(null=True)
+
+    def __str__(self):
+        return f"{self.descripcion} - {self.monto} (Vence: {self.fecha_limite})"

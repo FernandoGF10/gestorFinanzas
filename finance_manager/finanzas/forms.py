@@ -18,3 +18,11 @@ class GastoForm(forms.Form):
     monto = forms.FloatField()
     fecha = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
     categoria = forms.CharField(required=False)
+
+
+# Formulario para registrar un gasto esencial
+class GastoEsencialForm(forms.Form):
+    descripcion = forms.CharField(max_length=200)
+    monto = forms.FloatField()
+    fecha_limite = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    categoria = forms.CharField(required=False)

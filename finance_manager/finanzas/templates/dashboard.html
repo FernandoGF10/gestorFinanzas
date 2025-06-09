@@ -331,6 +331,33 @@
             background-color: #dc3545;
         }
 
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        .badge-success {
+            background-color: #27AE60;
+            color: white;
+        }
+
+        .gasto-vencido {
+            background-color: #ffebee;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .gasto-pendiente {
+            border-left: 4px solid #f1c40f;
+        }
+
+        .gasto-pagado {
+            border-left: 4px solid #27AE60;
+        }
+
     </style>
 </head>
 <body>
@@ -377,15 +404,22 @@
     <div class="row">
         <div class="half-card">
             <div class="card">
-                <div class="card-header">Resumen Financiero</div>
+                <div class="card-header">
+                    <i class="fas fa-chart-pie"></i> Resumen Financiero
+                </div>
                 <div class="card-body">
-                    <p>Sueldo Base: ${{ usuario.sueldo_base }}</p>
-                    <p>Total de Ingresos: ${{ total_ingresos }}</p>
-                    <p>Total de Gastos: ${{ total_gastos }}</p>
-                    <p>Saldo Restante: ${{ saldo_restante }}</p>
-                    <a href="{% url 'editar_resumen' usuario.id %}" class="btn-actualizar">
-                        <i class="fas fa-sync-alt"></i> Actualizar Monto
-                    </a>
+                    <div class="highlight-card">
+                        <p>Sueldo Base: ${{ usuario.sueldo_base }}</p>
+                        <p>Total Ingresos: ${{ total_ingresos }}</p>
+                        <p>Total Gastos: ${{ total_gastos }}</p>
+                        <p>Gastos Esenciales Pagados: ${{ gastos_esenciales_pagados }}</p>
+                        <p>Gastos Esenciales Pendientes: ${{ gastos_esenciales_pendientes }}</p>
+                        <p>Saldo Restante: ${{ saldo_restante }}</p>
+                        <p>Meta de Ahorro: ${{ usuario.meta_ahorro }}</p>
+                        <p>Ahorro Actual: ${{ usuario.ahorro_actual }}</p>
+                        <p>Porcentaje de Ahorro: {{ porcentaje_ahorro }}%</p>
+                    </div>
+                    <a href="{% url 'editar_resumen' usuario.id %}" class="btn-actualizar">Actualizar Resumen</a>
                 </div>
             </div>
         </div>
@@ -517,6 +551,71 @@
         </div>
     </div>
 
+    <div class="card half-card">
+        <div class="card-header">
+            <i class="fas fa-money-bill-wave"></i> Gastos
+        </div>
+        <div class="card-body">
+            <ul>
+                {% for gasto in gastos %}
+                <li>
+                    <span>{{ gasto.descripcion }} - ${{ gasto.monto }}</span>
+                    <div class="gasto-actions">
+                        <a href="{% url 'editar_gasto' gasto.id %}" class="btn-editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'eliminar_gasto' gasto.id %}" class="btn-eliminar" onclick="return confirm('¿Estás seguro de eliminar este gasto?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </li>
+                {% empty %}
+                <li>No hay gastos registrados</li>
+                {% endfor %}
+            </ul>
+            <a href="{% url 'agregar_gasto' usuario.id %}" class="btn">Agregar Gasto</a>
+        </div>
+    </div>
+
+    <!-- Sección de Gastos Esenciales -->
+    <div class="card half-card">
+        <div class="card-header" style="background-color: #e74c3c;">
+            <i class="fas fa-exclamation-circle"></i> Gastos Esenciales
+        </div>
+        <div class="card-body">
+            <ul>
+                {% for gasto in gastos_esenciales %}
+                <li style="{% if not gasto.pagado and gasto.fecha_limite < now %}background-color: #ffebee;{% endif %}">
+                    <div>
+                        <strong>{{ gasto.descripcion }}</strong>
+                        <div>${{ gasto.monto }}</div>
+                        <small>Vence: {{ gasto.fecha_limite|date:"d/m/Y" }}</small>
+                        {% if gasto.pagado %}
+                        <div class="badge badge-success">Pagado</div>
+                        {% endif %}
+                    </div>
+                    <div class="gasto-actions">
+                        {% if not gasto.pagado %}
+                        <a href="{% url 'marcar_gasto_esencial_pagado' gasto.id %}" class="btn-editar" title="Marcar como pagado">
+                            <i class="fas fa-check"></i>
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'editar_gasto_esencial' gasto.id %}" class="btn-editar">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'eliminar_gasto_esencial' gasto.id %}" class="btn-eliminar" onclick="return confirm('¿Estás seguro de eliminar este gasto esencial?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </li>
+                {% empty %}
+                <li>No hay gastos esenciales registrados</li>
+                {% endfor %}
+            </ul>
+            <a href="{% url 'agregar_gasto_esencial' usuario.id %}" class="btn" style="background-color: #e74c3c;">Agregar Gasto Esencial</a>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -590,6 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
 
 </body>
 </html>

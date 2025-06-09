@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Agregar Gasto Esencial</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <input type="text" class="form-control" id="descripcion" name="descripcion" required>
+        </div>
+        <div class="form-group">
+            <label for="monto">Monto</label>
+            <input type="number" class="form-control" id="monto" name="monto" step="0.01" required>
+        </div>
+        <div class="form-group">
+            <label for="fecha_limite">Fecha Límite de Pago</label>
+            <input type="date" class="form-control" id="fecha_limite" name="fecha_limite" required>
+        </div>
+        <div class="form-group">
+            <label for="categoria">Categoría</label>
+            <select class="form-control" id="categoria" name="categoria">
+                <option value="">Seleccione una categoría</option>
+                {% for categoria in categorias %}
+                <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'dashboard' usuario.id %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %} 
