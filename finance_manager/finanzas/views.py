@@ -137,11 +137,20 @@ def dashboard_usuario(request, usuario_id):
     # Resumen por categoría
     resumen_categorias = []
     categorias = Categoria.objects(usuario=usuario)
+    
+    # Datos para el gráfico de torta
+    categorias_nombres = []
+    gastos_por_categoria = []
 
     for categoria in categorias:
         # Obtener los gastos por categoría
         gastos_categoria = gastos.filter(categoria=categoria)
         total_categoria = sum(gasto.monto for gasto in gastos_categoria)
+
+        # Agregar datos para el gráfico
+        if total_categoria > 0:  # Solo incluir categorías con gastos
+            categorias_nombres.append(categoria.nombre)
+            gastos_por_categoria.append(total_categoria)
 
         # Obtener el límite de gasto de la categoría
         limite_categoria = categoria.limite_gasto
@@ -176,6 +185,8 @@ def dashboard_usuario(request, usuario_id):
         'gastos_mensuales': gastos_mensuales,
         'ingresos_mensuales': ingresos_mensuales,
         'now': date.today(),
+        'categorias_nombres': categorias_nombres,
+        'gastos_por_categoria': gastos_por_categoria,
     }
 
     return render(request, 'dashboard.html', context)
