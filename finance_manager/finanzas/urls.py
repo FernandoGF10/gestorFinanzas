@@ -24,4 +24,6 @@ urlpatterns = [
     path('gasto-esencial/<str:gasto_id>/editar/', views.editar_gasto_esencial, name='editar_gasto_esencial'),
     path('gasto-esencial/<str:gasto_id>/marcar-pagado/', views.marcar_gasto_esencial_pagado, name='marcar_gasto_esencial_pagado'),
     path('gasto-esencial/<str:gasto_id>/eliminar/', views.eliminar_gasto_esencial, name='eliminar_gasto_esencial'),
+    path('usuario/<str:usuario_id>/exportar_pdf/', views.exportar_pdf_mes, name='exportar_pdf_mes'),
+    path('usuario/<str:usuario_id>/perfil/', views.perfil_usuario, name='perfil_usuario'),
 ]

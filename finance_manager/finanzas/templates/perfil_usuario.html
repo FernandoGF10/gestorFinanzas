@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Agregar Gasto Esencial</title>
+    <title>Perfil de Usuario</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body {
@@ -34,7 +34,7 @@
             margin-top: 15px;
             font-weight: bold;
         }
-        form input, form select {
+        form input {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
@@ -72,30 +72,22 @@
 </head>
 <body>
     <header>
-        <h1><i class="fas fa-plus-circle"></i> Agregar Gasto Esencial para {{ usuario.nombre }}</h1>
+        <h1><i class="fas fa-user"></i> Perfil de {{ usuario.nombre }}</h1>
     </header>
     <div class="container">
-        {% if error %}
-            <div style="color: red; font-weight: bold; margin-bottom: 15px;">
-                {{ error }}
-            </div>
-        {% endif %}
         <form method="post">
             {% csrf_token %}
-            <label>Descripción:</label>
-            <input type="text" name="descripcion" required>
-            <label>Monto:</label>
-            <input type="number" name="monto" step="0.01" required>
-            <label>Fecha Límite de Pago:</label>
-            <input type="date" name="fecha_limite" required>
-            <label>Categoría:</label>
-            <select name="categoria">
-                <option value="">Seleccione una categoría</option>
-                {% for categoria in categorias %}
-                    <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit"><i class="fas fa-check"></i> Guardar</button>
+            <label>Nombre:</label>
+            <input type="text" name="nombre" value="{{ usuario.nombre }}" required>
+            <label>Email:</label>
+            <input type="email" name="email" value="{{ usuario.email }}" required>
+            <label>Sueldo Base:</label>
+            <input type="number" name="sueldo_base" step="0.01" value="{{ usuario.sueldo_base }}" required>
+            <label>Meta de Ahorro:</label>
+            <input type="number" name="meta_ahorro" step="0.01" value="{{ usuario.meta_ahorro }}">
+            <label>Ahorro Actual:</label>
+            <input type="number" name="ahorro_actual" step="0.01" value="{{ usuario.ahorro_actual }}">
+            <button type="submit"><i class="fas fa-save"></i> Guardar Cambios</button>
         </form>
         <a class="back-link" href="{% url 'dashboard' usuario.id %}"><i class="fas fa-arrow-left"></i> Volver al Dashboard</a>
     </div>

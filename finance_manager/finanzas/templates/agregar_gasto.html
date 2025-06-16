@@ -87,6 +87,13 @@
     </header>
 
     <div class="container">
+        {% if error %}
+            <div style="color: red; font-weight: bold; margin-bottom: 15px;">
+                {{ error }}<br>
+                <span>Saldo restante: ${{ saldo_restante }}</span><br>
+                <span>Monto ingresado: ${{ monto_ingresado }}</span>
+            </div>
+        {% endif %}
         <form method="post">
             {% csrf_token %}
             <label>Descripción:</label>
